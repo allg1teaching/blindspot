@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<meta charset="UTF-8">
+
+<head>
+    <title>Mapping the blind spot</title>
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugins/allg1-blindspot.js"></script>
+    <script src="jspsych/plugins/allg1-blindspotmap.js"></script>
+    <script src="jspsych/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="jspsych/plugins/jspsych-fullscreen.js"></script>
+    <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css">
+    </link>
+
+    <style>
+    .centered
+    {
+        text-align: center;
+        vertical-align: top;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    </style>
+</head>
+
+<body></body>
+
+<script>
+
+    var downloadData = function() {
+        // get subject initials
+        var initials = JSON.parse(jsPsych.data.get().filter({trial_type: 'survey-text'}).values()[0].responses).Q0;
+        // append UNIX timestamp (to reduce probability of name collisions)
+        var timestamp = Date.now();
+        var filename = initials+timestamp+".csv";
+        var text = jsPsych.data.get().filter({trial_type: 'posner-cueing', is_practice: 0}).csv();
+
+        // creates downloadable file containing text arg with name filename on client-side and prompts download
+        var fileDL = document.createElement('a');
+        fileDL.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        fileDL.setAttribute('download', filename);
+        fileDL.style.display = 'none';
+        document.body.appendChild(fileDL);
+        fileDL.click();
+        document.body.removeChild(fileDL);
+    }
+
+    jsPsych.pluginAPI.preloadImages(
+        [
+            "jspsych/target.png",
+            "jspsych/target_blue.png", 
+            "jspsych/target_black.png",
+            "jspsych/fix_blue.png", 
+            "jspsych/fix_green.png"
+        ],
+        function(){ console.log("image preloading successful"); },
+        function(){ console.log("preloading images") }
+    );
+
+    var gridX = 5;  // 16
+    var gridY = 5;  // 16
+
+    var psyRand = jsPsych.randomization;
+    var timeline = [];
+    var trial_number = 1;
+
+    timeline.push({
+        type: 'fullscreen',
+        fullscreen_mode: true
+    });
+
+    timeline.push(
+        instructions = {
+            type: 'instructions',
+            pages: [
+                "<h1>Mapping the blind spot</h1>" +
+                "<b>Background (1/4)</b><br><br>" +
+                "Your eyes contain a dense set of receptors that are sensitive to light energy. These receptors convert light energy into electrical energy, which eventually is transferred to your nervous system and your brain. These receptors, however, are not distributed evenly across your eye. There is a central location, called the fovea, where the receptors are very densely packed. Generally, when you stare at an object you are arranging your eyes so that the object's image falls on the foveae of your eyes. There are fewer receptors outside the fovea. In fact, in some places there are no receptors at all." +
+                "<br><br>Press the right arrow key to proceed" +
+                "<br><br><b>[>]</b>",
+                "<b>Background (2/4)</b><br><br>" +
+                "There is a place in each eye where the optic nerve exits the back of the eye to send information to the brain. This 'hole' is called the optic disk. It contains no light sensitive receptors. As a result, any light that falls on this part of the eye is undetected and invisible to you. Functionally, this location on the eye is called the blind spot." +
+                "<br><br><b>[>]</b>",
+                "<b>Background (3/4)</b><br><br>" +
+                "You have probably never noticed your blind spots (one in each eye). There are several reasons for this. First, each blind spot is far away from its eye's fovea. Because the fovea is typically where you are 'looking,' you would not generally notice that something has disappeared into a blind spot. Second, when you view the world with two eyes, one eye can compensate for the other eye's blind spot. Light that falls into the blind spot of one eye generally does not fall on the blind spot of the other eye. Third, your brain only processes the presence of information, not the absence. Your brain does not notice a 'hole' in the information it receives from the eye. It simply works with the information it receives. In a similar way, the brain does not observe that we are unable to view ultraviolet light. It has no knowledge about missing information." +
+                "<br><br><b>[>]</b>",
+                "<b>Background (4/4)</b><br><br>" +
+                "With the proper experiment, however, it is possible to identify and map the blind spot, which is the purpose of this experiment. You will probably be surprised at how large the blind spot is. It covers a large part of your visual field. The experiment used here is similar to a test used by eye doctors to identify visual scotomas (damaged spots in the retina of your eye). Should you consistently find 'holes' in your data other than the blind spot, you may want to see an eye doctor." +
+                "<br><br><b>[>]</b>",
+                "<b>Instructions (1/4)</b><br><br>" +
+                "A small blue fixation square will appear on the left of the screen. The experiment is designed to map the blind spot of your right eye. Close your left eye or cover it with your hand or a patch. Fix on the small square with your right eye. Try to sit so that your head is centered directly in front of the fixation square. Press the <b>space bar</b> key to start a trial. A white dot will appear somewhere on the screen. Simultaneously, the fixation point will turn green. Your task is to report whether you see the white dot or not, all while keeping your right eye fixed on the fixation square. " +
+                "<br><br><b>[>]</b>",
+                "<b>Instructions (2/4)</b><br><br>" +
+                "If you see the dot, press the <b>m</b> key. If you do not see the dot, press the <b>n</b> key. Either of the keys you press will produce written feedback at the location of the fixation point. This is simply to indicate that the computer received your response." +
+                "<br><br><b>[>]</b>",
+                "<b>Instructions (3/4)</b><br><br>" +
+                "There are a total of 289 trials. That may sound like a lot, but each trial takes only a couple of seconds. You can take a break if you wish, but try to stay seated in the same position when you resume the experiment. If you move around, your blind spot will move with you and the data will be a mix of the two positions you take. Also, be careful to make accurate judgments of whether you see or do not see the dot. If you try to go too fast, the computer will warn you to slow down. Most importantly, keep your right eye fixed on the small fixation square. If you move your eye around, be sure to go back to the fixation square before making your judgment about seeing or not seeing a dot." +
+                "<br><br><b>[>]</b>",
+                "<b>Instructions (3/4)</b><br><br>" +
+                "After you've completed the experiment you can view a visualization of your blind spot." +
+                "<br><br><b>[>]</b>"
+            ]
+        }
+    )
+
+    blindspotTrials = []
+    for (var x = 0; x < gridX+1; x++) {
+        for (var y = 0; y < gridY+1; y++) {
+            blindspotTrials.push(
+                blindspot = {
+                    type: 'allg1-blindspot',
+                    x: x,
+                    y: y,
+                    sizeX: gridX,
+                    sizeY: gridY,
+                    totalTrials: (gridX + 1) * (gridY + 1)
+                }
+            )
+        }
+    }
+    blindspotTrials = psyRand.shuffleNoRepeats(blindspotTrials);
+
+    for (var i=0; i<blindspotTrials.length; i++){
+        blindspotTrials[i].trialNumber = i+1;
+    }
+
+    timeline = timeline.concat(blindspotTrials);
+
+    timeline.push(
+        preMap = {
+            type: 'instructions',
+            pages: [
+                "You have completed the experiment.<br><br>" +
+                "On the following page, you will be able to see your mapped blind spot. Blue circles indicate that you were able to see the target in that position, " +
+                "black circles indicate the opposite.<br><br>" +
+                "Press the right arrow key on your keyboard to proceed to the next page.<br><br>" +
+                "<b>[>]</b>"
+            ]
+        }
+    )
+
+    timeline.push(
+        map = {
+            type: 'allg1-blindspotmap',
+            sizeX: gridX,
+            sizeY: gridY,
+        }
+    )
+
+    jsPsych.init({
+        timeline: timeline,
+        on_trial_finish: function () {
+            setTimeout(jsPsych.resumeExperiment, 200);
+        },
+    })
+</script>
+
+</html>
