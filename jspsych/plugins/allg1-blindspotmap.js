@@ -60,6 +60,7 @@
     
         responses = jsPsych.data.get().filter({trial_type: 'allg1-blindspot'}).values()
 
+        divs = [];
         for (var i=0; i<responses.length; i++){
             var targetX = responses[i].targetX;
             var targetY = responses[i].targetY;
@@ -72,6 +73,7 @@
             targDiv.style.top = targTop - targSize/2 + "px";
             targDiv.setAttribute("class", "centered");
             display_element.appendChild(targDiv);
+            divs.push(targDiv);
 
             switch (responses[i].responseVisible){
                 case 1:
@@ -83,63 +85,28 @@
             }
         }
 
+        var dlBut = document.createElement("div");
+        dlBut.style.position = "absolute";
+        dlBut.style.left     = cutAway / 2 - 0.25 * cutAway + "px";
+        dlBut.style.top      = screenH / 2 +  - 0.04 * screenH + "px";
+        dlBut.style.width    = 0.5 * cutAway + "px";
+        dlBut.style.height   = 0.08 * screenH + "px";
 
 
-        var drawFix = function(color){
-            // color: blue/green
-            divs['fix'].innerHTML = "<img src='jspsych/fix_"+ color + ".png'></img>";  // draw blue/green fix spot
-        }
+        dlBut.innerHTML = "<input id='clickMe' type='button' value='Download in CSV format' onclick='downloadData();' />";
+        display_element.appendChild(dlBut);
 
-        var drawTarget = function(){
-            divs['targ'].innerHTML = "<img src='jspsych/target.png'></img>";  // draw target
-        }
 
-        var drawText = function(text){
-            divs['text'].innerHTML = text;
-        }
-
-        var drawProg = function(){
-            divs['prog'].innerHTML = trialNumber + "/" + totalTrials;
-        }
-
-        var endTrial = function(){
-            display_element.removeChild(divs['fix']);
-            display_element.removeChild(divs['targ']);
-            display_element.removeChild(divs['text']);
-            display_element.removeChild(divs['prog']);
-
-            jsPsych.finishTrial(trialData);
-        }
-
-        var response = function(info){
-            drawFix('blue');
-            drawProg();
-            switch (info.key){
-                case 77:  // m
-                    trialData.responseVisible = 1;
-                    drawText('Seen');
-                    break;
-                case 78:  // n
-                    trialData.responseVisible = 0;
-                    drawText('Not seen');
-                    break;
+        var next = function(){
+            for (var i=0; i<responses.length; i++){
+                display_element.removeChild(divs[i]);
             }
-            
-            jsPsych.pluginAPI.getKeyboardResponse({
-                callback_function: endTrial,
-                valid_responses: ['space'],
-                rt_method: 'performance',
-                persist: false,
-                allow_held_key: false
-            });
+            jsPsych.finishTrial({});
         }
-
-        drawFix('green');
-        drawTarget();
 
         jsPsych.pluginAPI.getKeyboardResponse({
-            callback_function: response,
-            valid_responses: ['n', 'm'],
+            callback_function: next,
+            valid_responses: ['space'],
             rt_method: 'performance',
             persist: false,
             allow_held_key: false

@@ -12,6 +12,7 @@
     <script src="jspsych/plugins/jspsych-instructions.js"></script>
     <script src="jspsych/plugins/jspsych-survey-text.js"></script>
     <script src="jspsych/plugins/jspsych-fullscreen.js"></script>
+    <script src="jspsych/plugins/html2canvas.js"></script>
     <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css">
     </link>
 
@@ -37,7 +38,7 @@
         // append UNIX timestamp (to reduce probability of name collisions)
         var timestamp = Date.now();
         var filename = initials+timestamp+".csv";
-        var text = jsPsych.data.get().filter({trial_type: 'posner-cueing', is_practice: 0}).csv();
+        var text = jsPsych.data.get().filter({trial_type: 'allg1-blindspot'}).csv();
 
         // creates downloadable file containing text arg with name filename on client-side and prompts download
         var fileDL = document.createElement('a');
@@ -68,6 +69,13 @@
     var timeline = [];
     var trial_number = 1;
 
+    timeline.push(
+        initials = {
+            type: 'survey-text',
+            questions: [{prompt: "Before you begin, please enter your initials"}]
+        }
+    );
+
     timeline.push({
         type: 'fullscreen',
         fullscreen_mode: true
@@ -92,7 +100,7 @@
                 "With the proper experiment, however, it is possible to identify and map the blind spot, which is the purpose of this experiment. You will probably be surprised at how large the blind spot is. It covers a large part of your visual field. The experiment used here is similar to a test used by eye doctors to identify visual scotomas (damaged spots in the retina of your eye). Should you consistently find 'holes' in your data other than the blind spot, you may want to see an eye doctor." +
                 "<br><br><b>[>]</b>",
                 "<b>Instructions (1/4)</b><br><br>" +
-                "A small blue fixation square will appear on the left of the screen. The experiment is designed to map the blind spot of your right eye. Close your left eye or cover it with your hand or a patch. Fix on the small square with your right eye. Try to sit so that your head is centered directly in front of the fixation square. Press the <b>space bar</b> key to start a trial. A white dot will appear somewhere on the screen. Simultaneously, the fixation point will turn green. Your task is to report whether you see the white dot or not, all while keeping your right eye fixed on the fixation square. " +
+                "A small fixation square will appear on the left of the screen. The experiment is designed to map the blind spot of your right eye. Close your left eye or cover it with your hand or a patch. Fix on the small square with your right eye. Try to sit so that your head is centered directly in front of the fixation square. A white dot will appear somewhere on the screen. Your task is to report whether you see the white dot or not, all while keeping your right eye fixed on the fixation square. " +
                 "<br><br><b>[>]</b>",
                 "<b>Instructions (2/4)</b><br><br>" +
                 "If you see the dot, press the <b>n</b> key. If you do not see the dot, press the <b>m</b> key. Either of the keys you press will produce written feedback at the location of the fixation point. This is simply to indicate that the computer received your response." +
@@ -135,9 +143,10 @@
             type: 'instructions',
             pages: [
                 "You have completed the experiment.<br><br>" +
-                "On the following page, you will be able to see your mapped blind spot. Blue circles indicate that you were able to see the target in that position, " +
+                "On the following page, you will be able to see your mapped blind spot and download your data in text (CSV) format. Blue circles indicate that you were able to see the target in that position, " +
                 "black circles indicate the opposite.<br><br>" +
                 "Press the right arrow key on your keyboard to proceed to the next page.<br><br>" +
+                "Afterwards you can end the experiment by pressing the <b>space</b> key once more.<br><br>" +
                 "<b>[>]</b>"
             ]
         }
@@ -150,6 +159,16 @@
             sizeY: gridY,
         }
     )
+
+    timeline.push( 
+        finished = {
+            type: 'html-keyboard-response',
+            stimulus: "Thank you for participating! You can close the window now.",
+            choices: [32]
+    } );
+
+    var feedback = "";  // draw and update during trials
+    var progress = "";  // draw and update during trials
 
     jsPsych.init({
         timeline: timeline,

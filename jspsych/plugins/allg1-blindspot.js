@@ -132,7 +132,7 @@
         }
 
         var drawProg = function(){
-            divs['prog'].innerHTML = trialNumber + "/" + totalTrials;
+            divs['prog'].innerHTML = progress;
         }
 
         var endTrial = function(){
@@ -146,28 +146,23 @@
 
         var response = function(info){
             drawFix('blue');
-            drawProg();
+            progress = trialNumber + "/" + totalTrials;
             switch (info.key){
                 case 78:  // n
                     trialData.responseVisible = 1;
-                    drawText('Seen');
+                    feedback = "Seen";
                     break;
                 case 77:  // m
                     trialData.responseVisible = 0;
-                    drawText('Not seen');
+                    feedback = "Not seen";
                     break;
             }
-            
-            jsPsych.pluginAPI.getKeyboardResponse({
-                callback_function: endTrial,
-                valid_responses: ['space'],
-                rt_method: 'performance',
-                persist: false,
-                allow_held_key: false
-            });
+            endTrial();
         }
 
         drawFix('green');
+        drawText(feedback);
+        drawProg();
         drawTarget();
 
         jsPsych.pluginAPI.getKeyboardResponse({
